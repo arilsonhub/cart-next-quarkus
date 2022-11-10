@@ -1,0 +1,42 @@
+version: '3.7'
+
+volumes:
+  cart-next-data: {}
+
+services:
+  web:
+    build: 
+      context: .
+      dockerfile: ./infra/web/Dockerfile.dev
+    ports:
+      - 5200:3000
+    volumes:
+      - ./app/web/cart-next:/home/node/app
+
+  api:
+    build: 
+      context: .
+      dockerfile: ./app/api/cart-next/src/main/docker/Dockerfile.dev
+    ports:
+      - 5201:8080
+      - 5202:5005
+    volumes:
+      - ./app/api/cart-next:/home/judice/app
+
+  cart-next-database:
+    image: postgres:14.2
+    restart: on-failure        
+    volumes:
+        - cart-next-data:/var/lib/postgresql/data
+    environment:
+        POSTGRES_USER: cart-next
+        POSTGRES_PASSWORD: cart-next
+        POSTGRES_DB: cart-next
+        POSTGRES_INITDB_ARGS: --auth-host=md5 --auth-local=md5
+    ports:
+        - "5203:5432"
+    healthcheck:
+        test: ["CMD", "pg_isready", "-U", "cart-next"]
+        interval: 30s
+        timeout: 30s
+        retries: 3

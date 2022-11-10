@@ -1,0 +1,13 @@
+FROM node:16.16.0-slim
+
+RUN npm install -g npm@8.19.2 && apt update && apt install -y
+
+USER node
+
+RUN mkdir -p /home/node/app
+
+COPY ./infra/web/entrypoint.sh /usr/local/bin
+
+WORKDIR /home/node/app
+
+ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
